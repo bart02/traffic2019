@@ -55,5 +55,5 @@ void loop() {
 	float pd = PD(err, kp, kd);
 	servo(pd);
 	Serial.println(pd);
-	delay(10);
+	delay(2);
 }

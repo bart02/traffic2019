@@ -6,6 +6,9 @@ Servo myservo;
 volatile long enc = 0;
 float oldin = 0;
 bool useold = 0;
+const int len_arr = 10;
+float err_arr[len_arr];
+unsigned int err_kol = 0;
 
 void encoder() {
 	enc++;
@@ -45,10 +48,11 @@ float senOut(int d[16], float w[16]) {
 
 float PD(float in, float kp, float kd) {
 	float out = 0;
-	if (useold) out = in * kp + (in - oldin) * kd;
+	err_arr[err_kol % 10] = in;
+	err_kol++;
+	if (useold) out = in * kp + (err_arr[err_kol] - err_arr[(err_kol + 11) % 10]) * kd;
 	else out = in * kp;
-	useold = 1;
-	oldin = in;
+	if (err_kol > 10) useold = 1;
 	return out;
 }
 

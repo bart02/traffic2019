@@ -28,16 +28,16 @@ void go(int motor[3], int speedd, bool forward = 1) {
 	}
 }
 
-float senOut(int d[7], float w[7]) {
+float senOut(int d[16], float w[16]) {
 	float ch = 0;
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < 16; i++) {
 		//    Serial.print(d[i] * w[i]);
 		//    Serial.print("\t");
 		ch = ch + d[i] * w[i];
 	}
 	//  Serial.println();
 	float zn = 0;
-	for (int i = 0; i < 7; i++) zn = zn + d[i];
+	for (int i = 0; i < 16; i++) zn = zn + d[i];
 
 	float frac = float(ch) / float(zn);
 	return frac;
@@ -63,20 +63,12 @@ void servo(float pos, int k = -1) {
 	myservo.write(int(pos));
 }
 
-void printSensors(int d[7]) {
-	Serial.print(d[0]);
-	Serial.print("\t");
-	Serial.print(d[1]);
-	Serial.print("\t");
-	Serial.print(d[2]);
-	Serial.print("\t");
-	Serial.print(d[3]);
-	Serial.print("\t");
-	Serial.print(d[4]);
-	Serial.print("\t");
-	Serial.print(d[5]);
-	Serial.print("\t");
-	Serial.println(d[6]);
+void printSensors(int d[16]) {
+	for (int i = 0; i < 16; i++) {
+		Serial.print(d[i]);
+		Serial.print("\t");
+	}
+	Serial.println();
 }
 
 int IRread() {

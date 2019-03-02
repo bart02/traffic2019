@@ -1,12 +1,18 @@
 #include <Servo.h>
+#include <Wire.h>
+#include <Octoliner.h>
+
 #include "func.h"
+
+Octoliner lineleft(42);
+Octoliner lineright(45);
 
 #define ENCODER_INT 2 // прерывание энкодера
 // текущее значение энкодера в переменной enc
 
 //            [en, in1, in2]
 int motor[3] = { 3, 24, 25 };
-float w[7] = { -3.2, -2, -1, 0, 1, 2, 3.2 };
+float w[16] = { -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8 };
 
 
 void setup() {
@@ -14,94 +20,40 @@ void setup() {
 	myservo.attach(14);
 	Serial1.begin(115200);
 	Serial.begin(9600);
-	waitGreen();
+	//waitGreen();
 	enc = -5;
 
+
+
+	Wire.begin();
+	// начало работы с датчиками линии
+	lineleft.begin();
+	// выставляем чувствительность фотоприёмников в диапазоне от 0 до 255
+	lineleft.setSensitivity(210);
+	// выставляем яркость свечения ИК-светодиодов в диапазоне от 0 до 255
+	lineleft.setBrightness(255);
+	// начало работы с датчиками линии
+	lineright.begin();
+	// выставляем чувствительность фотоприёмников в диапазоне от 0 до 255
+	lineright.setSensitivity(210);
+	// выставляем яркость свечения ИК-светодиодов в диапазоне от 0 до 255
+	lineright.setBrightness(255);
 }
 
 void loop() {
-	byte speed = 120;
-	float kp = 3; //40
-	float kd = 80; //80
+	byte speed = 80;
+	float kp = 10; //40
+	float kd = 20; //80
 
-	Serial.println(enc);
-
-	if (enc > 20) {
-		speed = 0;
-	}
-	if (enc > 30) {
-		speed = 40;
-		kp = 25; //40
-		kd = 80;
-	}
-	if (enc > 60) {
-		speed = 65;
-		kp = 30;
-		kd = 100;
-	}
-	if (enc > 100) {
-		speed = 90;
-		kp = 10;
-		kd = 20;
-	}
-	if (enc > 115) {
-		speed = 50;
-		kp = 20;
-		kd = 30;
-	}
-	if (enc > 140) {
-		speed = 60;
-		kp = 23;
-		kd = 50;
-	}
-	if (enc > 200) {
-		speed = 150;
-		kp = 3;
-		kd = 70;
-	}
-	//if (enc > 210) {
-	//	speed = 140;
-	//	kp = 5;
-	//	kd = 200;
-	//}
-	//if (enc > 90) {
-	//	speed = 40;
-	//	kp = 35;
-	//	kd = 40;
-	//}
-	//if (enc > 120) {
-	//	speed = 60;
-	//	kp = 40;
-	//	kd = 40;
-	//}
-	//if (enc >215) {
-	//	go(motor, 90);
-	//	kp = 12;
-	//	kd = 40;
-	//}
-	//if (enc > 250) {
-	//	go(motor, 0);
-	//}
-	//if (enc > 275) {
-	//	go(motor, 60);
-	//	kp = 40;
-	//	kd = 40;
-	//}
-	//if (enc > 360) {
-	//	go(motor, 100);
-	//	kp = 13;
-	//	kd = 40;
-	//}
-	//if (enc > 390) {
-	//	go(motor, 120);
-	//	kp = 10;
-	//	kd = 40;
-	//}
+	//Serial.println(enc);
 
 	go(motor, speed);
-	int d[7] = { analogRead(A6), analogRead(A7), analogRead(A8), analogRead(A9), analogRead(A10), analogRead(A11), analogRead(A12) };
-	printSensors(d);
+	int d[16] = { lineleft.analogRead(7), lineleft.analogRead(6), lineleft.analogRead(5), lineleft.analogRead(4), lineleft.analogRead(3), lineleft.analogRead(2), lineleft.analogRead(1), lineleft.analogRead(0), lineright.analogRead(7), lineright.analogRead(6), lineright.analogRead(5), lineright.analogRead(4), lineright.analogRead(3), lineright.analogRead(2), lineright.analogRead(1), lineright.analogRead(0) };
+	//printSensors(d);
 	float err = senOut(d, w);
+	
 	float pd = PD(err, kp, kd);
 	servo(pd);
+	Serial.println(pd);
+	delay(10);
 }

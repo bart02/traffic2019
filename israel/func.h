@@ -6,6 +6,7 @@ Servo myservo;
 volatile long enc = 0;
 float oldin = 0;
 bool useold = 0;
+int sum = 0;
 
 void encoder() {
 	enc++;
@@ -46,6 +47,16 @@ float senOut(int d[16], float w[16]) {
 float PD(float in, float kp, float kd) {
 	float out = 0;
 	if (useold) out = in * kp + (in - oldin) * kd;
+	else out = in * kp;
+	useold = 1;
+	oldin = in;
+	return out;
+}
+
+float PID(float in, float kp, float ki, float kd) {
+	float out = 0;
+	sum += in;
+	if (useold) out = in * kp + (in - oldin) * kd + sum * ki;
 	else out = in * kp;
 	useold = 1;
 	oldin = in;

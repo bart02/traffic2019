@@ -42,8 +42,9 @@ void setup() {
 
 void loop() {
 	byte speed = 80;
-	float kp = 10; //40
-	float kd = 20; //80
+	float kp = 7; //40
+	float ki = 0.1; //40
+	float kd = 30; //80
 
 	//Serial.println(enc);
 
@@ -52,7 +53,7 @@ void loop() {
 	//printSensors(d);
 	float err = senOut(d, w);
 	
-	float pd = PD(err, kp, kd);
+	float pd = PID(err, kp, ki, kd);
 	servo(pd);
 	Serial.println(pd);
 	delay(10);

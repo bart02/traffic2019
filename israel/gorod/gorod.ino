@@ -10,7 +10,7 @@ Octoliner lineright(45);
 
 #define ENCODER_INT 2 // прерывание энкодера
 // текущее значение энкодера в переменной enc
-#define SPEEDTEK 60
+#define SPEEDTEK 70
 
 //            [en, in1, in2]
 int motor[3] = { 3, 24, 25 };
@@ -23,6 +23,7 @@ unsigned long mil = 0;
 unsigned long vrem = 1500;
 bool stopped = 0;
 
+int count = 1;
 
 int speed = SPEEDTEK;
 
@@ -46,6 +47,10 @@ void setup() {
 	// выставляем яркость свечения ИК-светодиодов в диапазоне от 0 до 255
 	lineright.setBrightness(255);
 	pinMode(13, OUTPUT);
+	pinMode(53, OUTPUT);
+	pinMode(38, OUTPUT);
+	pinMode(39, OUTPUT);
+	pinMode(40, OUTPUT);
 	digitalWrite(13, 1);
 	//waitGreen();
 
@@ -55,6 +60,7 @@ void loop() {
 	float kp = 26; //40
 	float kd = 100; //80
 	int ir = IRread();
+	int d[16] = { lineleft.analogRead(7), lineleft.analogRead(6), lineleft.analogRead(5), lineleft.analogRead(4), lineleft.analogRead(3), lineleft.analogRead(2), lineleft.analogRead(1), lineleft.analogRead(0), lineright.analogRead(7), lineright.analogRead(6), lineright.analogRead(5), lineright.analogRead(4), lineright.analogRead(3), lineright.analogRead(2), lineright.analogRead(1), lineright.analogRead(0) };
 	if (ultraon) {
 		int dist = ultrasonic.Ranging(CM);
 		Serial.println(dist);
@@ -71,7 +77,7 @@ void loop() {
 		}
 	}
 	if (ir != -1 && ir != 2 && ir != 3 && ir < 7 && svetofor && polin) {
-		speed = SPEEDTEK - 10;
+		//speed = SPEEDTEK - 20;
 		if (lineright.analogRead(0) > 300 && lineright.analogRead(1) > 300 && lineright.analogRead(2) > 300 && lineright.analogRead(3) > 300 && lineright.analogRead(4) > 300 && lineright.analogRead(5) > 300) {
 			if (ir == 6) {
 				mil = millis();
@@ -90,7 +96,7 @@ void loop() {
 				polin = 0;
 				servo(0);
 				go(motor, -255);
-				delay(45);
+				delay(70);
 				go(motor, 0);
 				delay(500);
 			}
@@ -110,16 +116,44 @@ void loop() {
 			mil = millis();
 		}
 	}
-	if (millis() - mil > vrem) {
+	if (millis() - mil > vrem && !svetofor) {
 		speed = SPEEDTEK;
 		svetofor = 1;
 	}
+	if (ir == 7 && senSum(d) > 6500 && senSum(d) < 8000 && millis() - mil > 500) {
+		if (count % 2 == 0) {
+			count++;
+			polin = 0;
+			servo(0);
+			delay(700);
+			polin = 1;
+		} else {
+			count++;
+			digitalWrite(53, 1);
+			polin = 0;
+			go(motor, SPEEDTEK - 20);
+			servo(45);
+			delay(700);
+			speed = SPEEDTEK;
+			go(motor, speed);
+			polin = 1;
+			digitalWrite(53, 0);
+		}
+	}
+	if (count % 2 == 0) {
+		digitalWrite(39, 0);
+		digitalWrite(40, 1);
+	}
+	else {
+		digitalWrite(39, 1);
+		digitalWrite(40, 0);
+	}
 	if (polin) {
 		float kp = 7; //40
-		float ki = 0.1; //40
+		float ki = 0.2; //40
 		float kd = 30; //80
-		int d[16] = { lineleft.analogRead(7), lineleft.analogRead(6), lineleft.analogRead(5), lineleft.analogRead(4), lineleft.analogRead(3), lineleft.analogRead(2), lineleft.analogRead(1), lineleft.analogRead(0), lineright.analogRead(7), lineright.analogRead(6), lineright.analogRead(5), lineright.analogRead(4), lineright.analogRead(3), lineright.analogRead(2), lineright.analogRead(1), lineright.analogRead(0) };
-
+		
+		Serial.println(count);
 		float err = senOut(d, w);
 		float pd = PID(err, kp, ki, kd);
 		servo(pd);

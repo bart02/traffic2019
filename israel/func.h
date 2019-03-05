@@ -44,6 +44,12 @@ float senOut(int d[16], float w[16]) {
 	return frac;
 }
 
+int senSum(int d[16]) {
+	int sum = 0;
+	for (int i = 0; i < 16; i++) sum = sum + d[i];
+	return sum;
+}
+
 float PD(float in, float kp, float kd) {
 	float out = 0;
 	if (useold) out = in * kp + (in - oldin) * kd;

@@ -3,14 +3,23 @@
 #include "func.h"
 #include <Wire.h>
 #include <Octoliner.h>
+#include <SharpIR.h>
 
 Ultrasonic ultrasonic(48, 49);
 Octoliner lineleft(42);
 Octoliner lineright(45);
+SharpIR sharp(A6, 1080);
 
 #define ENCODER_INT 2 // прерывание энкодера
 // текущее значение энкодера в переменной enc
 #define SPEEDTEK 70
+
+#define PLEFT 52
+#define PRIGHT 53
+
+#define RED 40
+#define YELLOW 39
+#define GREEN 38
 
 //            [en, in1, in2]
 int motor[3] = { 3, 24, 25 };
@@ -22,6 +31,13 @@ bool svetofor = 1;
 unsigned long mil = 0;
 unsigned long vrem = 1500;
 bool stopped = 0;
+
+byte blink = 0; //1red 2 y 3g
+bool blink_state = 0;
+unsigned long blinkmil = 0;
+
+unsigned long irdamil = 0;
+unsigned long timerirdamil = 0;
 
 int count = 1;
 
@@ -47,11 +63,11 @@ void setup() {
 	// выставляем яркость свечения ИК-светодиодов в диапазоне от 0 до 255
 	lineright.setBrightness(255);
 	pinMode(13, OUTPUT);
-	pinMode(53, OUTPUT);
-	pinMode(38, OUTPUT);
-	pinMode(39, OUTPUT);
-	pinMode(40, OUTPUT);
-	digitalWrite(13, 1);
+	pinMode(PLEFT, OUTPUT);
+	pinMode(PRIGHT, OUTPUT);
+	pinMode(RED, OUTPUT);
+	pinMode(YELLOW, OUTPUT);
+	pinMode(GREEN, OUTPUT);
 	//waitGreen();
 
 }
@@ -61,22 +77,23 @@ void loop() {
 	float kd = 100; //80
 	int ir = IRread();
 	int d[16] = { lineleft.analogRead(7), lineleft.analogRead(6), lineleft.analogRead(5), lineleft.analogRead(4), lineleft.analogRead(3), lineleft.analogRead(2), lineleft.analogRead(1), lineleft.analogRead(0), lineright.analogRead(7), lineright.analogRead(6), lineright.analogRead(5), lineright.analogRead(4), lineright.analogRead(3), lineright.analogRead(2), lineright.analogRead(1), lineright.analogRead(0) };
-	if (ultraon) {
-		int dist = ultrasonic.Ranging(CM);
+	if (ir == 5) {
+		int dist = sharp.distance();
 		Serial.println(dist);
-		if (dist < 30 && dist > 10) {
+		if (dist < 30 && polin) {
 			polin = 0;
-			servo(0);
+			servo(0); 
+			go(motor, -255);
+			delay(30);
 			go(motor, 0);
 			delay(1000);
 		}
-		if ((dist >= 60 || dist <= 5) && !polin) {
+		if ((dist >= 60) && !polin) {
 			ultraon = 0;
 			polin = 1;
-			digitalWrite(13, 0);
 		}
 	}
-	if (ir != -1 && ir != 2 && ir != 3 && ir < 7 && svetofor && polin) {
+	if (ir != -1 && ir != 2 && ir != 3 && ir != 5 && ir < 7 && svetofor && polin) {
 		//speed = SPEEDTEK - 20;
 		if (lineright.analogRead(0) > 300 && lineright.analogRead(1) > 300 && lineright.analogRead(2) > 300 && lineright.analogRead(3) > 300 && lineright.analogRead(4) > 300 && lineright.analogRead(5) > 300) {
 			if (ir == 6) {
@@ -84,7 +101,7 @@ void loop() {
 				polin = 0;
 				servo(0);
 				go(motor, -255);
-				delay(70);
+				delay(80);
 				go(motor, 0);
 				delay(5000);
 				go(motor, 60);
@@ -119,17 +136,86 @@ void loop() {
 	if (millis() - mil > vrem && !svetofor) {
 		speed = SPEEDTEK;
 		svetofor = 1;
+		blink = 0;
+		digitalWrite(PLEFT, 0);
+		digitalWrite(PRIGHT, 0);
 	}
+
+	if (blink && millis() - blinkmil > 500) {
+		blink_state = !blink_state;
+		digitalWrite(blink, blink_state);
+		blinkmil = millis();
+	}
+
+	if (millis() - irdamil > 200) {
+		if (ir > -1 && ir < 7) {
+			Serial.println(ir);
+			if (ir == 0) {
+				digitalWrite(RED, 1);
+				digitalWrite(YELLOW, 0);
+				digitalWrite(GREEN, 0);
+				blink = 0;
+			}
+			else if (ir == 1) {
+				digitalWrite(RED, 1);
+				digitalWrite(YELLOW, 1);
+				digitalWrite(GREEN, 0);
+				blink = 0;
+			}
+			else if (ir == 2) {
+				digitalWrite(RED, 0);
+				digitalWrite(YELLOW, 0);
+				digitalWrite(GREEN, 1);
+				blink = 0;
+			}
+			else if (ir == 3) {
+				digitalWrite(RED, 0);
+				digitalWrite(YELLOW, 0);
+				digitalWrite(GREEN, blink_state);
+				blink = GREEN;
+			}
+			else if (ir == 4) {
+				digitalWrite(RED, 0);
+				digitalWrite(YELLOW, 1);
+				digitalWrite(GREEN, 0);
+				blink = 0;
+			}
+			else if (ir == 5) {
+				digitalWrite(RED, 0);
+				digitalWrite(YELLOW, blink_state);
+				digitalWrite(GREEN, 0);
+				blink = YELLOW;
+			}
+			else if (ir == 6) {
+				digitalWrite(RED, blink_state);
+				digitalWrite(YELLOW, 0);
+				digitalWrite(GREEN, 0);
+				blink = RED;
+			}
+			irdamil = millis();
+			timerirdamil = millis();
+		}
+		else {
+			if (millis() - timerirdamil > 500) {
+				digitalWrite(RED, 0);
+				digitalWrite(YELLOW, 0);
+				digitalWrite(GREEN, 0);
+			}
+		}
+	}
+
 	if (ir == 7 && senSum(d) > 6500 && senSum(d) < 8000 && millis() - mil > 500) {
 		if (count % 2 == 0) {
-			count++;
+			digitalWrite(PLEFT, 1);
+			blink = PLEFT;
 			polin = 0;
 			servo(0);
-			delay(700);
+			delay(1000);
 			polin = 1;
+			//speed = SPEEDTEK;
 		} else {
-			count++;
-			digitalWrite(53, 1);
+			digitalWrite(PRIGHT, 1);
+			blink = PRIGHT;
 			polin = 0;
 			go(motor, SPEEDTEK - 20);
 			servo(45);
@@ -137,17 +223,18 @@ void loop() {
 			speed = SPEEDTEK;
 			go(motor, speed);
 			polin = 1;
-			digitalWrite(53, 0);
 		}
+		count++;
+		mil = millis();
 	}
-	if (count % 2 == 0) {
-		digitalWrite(39, 0);
-		digitalWrite(40, 1);
-	}
-	else {
-		digitalWrite(39, 1);
-		digitalWrite(40, 0);
-	}
+	//if (count % 2 == 0) {
+	//	digitalWrite(39, 0);
+	//	digitalWrite(40, 1);
+	//}
+	//else {
+	//	digitalWrite(39, 1);
+	//	digitalWrite(40, 0);
+	//}
 	if (polin) {
 		float kp = 7; //40
 		float ki = 0.2; //40

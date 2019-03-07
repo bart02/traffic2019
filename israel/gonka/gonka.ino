@@ -29,22 +29,22 @@ void setup() {
 	// начало работы с датчиками линии
 	lineleft.begin();
 	// выставляем чувствительность фотоприёмников в диапазоне от 0 до 255
-	lineleft.setSensitivity(210);
+	lineleft.setSensitivity(220);
 	// выставляем яркость свечения ИК-светодиодов в диапазоне от 0 до 255
 	lineleft.setBrightness(255);
 	// начало работы с датчиками линии
 	lineright.begin();
 	// выставляем чувствительность фотоприёмников в диапазоне от 0 до 255
-	lineright.setSensitivity(210);
+	lineright.setSensitivity(220);
 	// выставляем яркость свечения ИК-светодиодов в диапазоне от 0 до 255
 	lineright.setBrightness(255);
 }
 
 void loop() {
-	byte speed = 80;
-	float kp = 7; //40
-	float ki = 0.1; //40
-	float kd = 30; //80
+	byte speed = 90;
+	float kp = 9; //40
+	float ki = 0; //40
+	float kd = 41; //80
 
 	//Serial.println(enc);
 
@@ -56,5 +56,5 @@ void loop() {
 	float pd = PID(err, kp, ki, kd);
 	servo(pd);
 	Serial.println(pd);
-	delay(10);
+	delay(5);
 }

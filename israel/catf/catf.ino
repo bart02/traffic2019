@@ -30,96 +30,129 @@ int step = 1;
 void povorot(bool minus = 1) {
 	int step = 1;
 	enc = 0;
-	while (step == 1) {
-		digitalWrite(RED, 1);
+	yaw = 0;
+	while (enc < 35 && yaw <= 88)
+	{
 		unsigned long timer = millis();
 		Vector norm = mpu.readNormalizeGyro();
 		yaw = yaw + norm.ZAxis * timeStep;
-		servo(-10 + enc * (-4));
+		servo(0.12 * (enc - 17) * (enc - 17) - 25 - 9.68);
 		Serial.println(enc);
-
-		if (enc > 17) {
-			step = 2;
-			enc = -15;
-		}
-		else go(motor, 50);
+		go(motor, 50);
 		// Wait to full timeStep period 
 		delay((timeStep * 1000) - (millis() - timer));
+		
 	}
+	enc = 0;
+	yaw = 0;
+	//while (step == 1) {
+		//digitalWrite(RED, 1);
+		//unsigned long timer = millis();
+		//Vector norm = mpu.readNormalizeGyro();
+		//yaw = yaw + norm.ZAxis * timeStep;
+		//servo(-10 + enc * (-4));
+		//Serial.println(enc);
 
-	while (step == 2) {
-		digitalWrite(YELLOW, 1);
-		unsigned long timer = millis();
-		Vector norm = mpu.readNormalizeGyro();
-		yaw = yaw + norm.ZAxis * timeStep;
-		servo(enc * (2.6));
-		Serial.println(enc);
+		//if (enc > 17) {
+		//	step = 2;
+		//	enc = -15;
+		//}
+		//else go(motor, 50);
+		//// Wait to full timeStep period 
+		//delay((timeStep * 1000) - (millis() - timer));
+	//}
 
-		if (enc > 0 || yaw >= 85) {
-			step = 3;
-			enc = 0;
-			yaw = 0;
-		}
-		else go(motor, 50);
-		// Wait to full timeStep period 
-		delay((timeStep * 1000) - (millis() - timer));
-	}
+	//while (step == 2) {
+	//	digitalWrite(YELLOW, 1);
+	//	unsigned long timer = millis();
+	//	Vector norm = mpu.readNormalizeGyro();
+	//	yaw = yaw + norm.ZAxis * timeStep;
+	//	servo(enc * (2.6));
+	//	Serial.println(enc);
+
+	//	if (enc > 0 || yaw >= 85) {
+	//		step = 3;
+	//		enc = 0;
+	//		yaw = 0;
+	//	}
+	//	else go(motor, 50);
+	//	// Wait to full timeStep period 
+	//	delay((timeStep * 1000) - (millis() - timer));
+	//}
 }
 
 void fullpovorot() {
 	int step = 1;
 	enc = 0;
-	while (step == 1) {
-		digitalWrite(RED, 1);
+	yaw = 0;
+	int servos[] = { -3, -9, -15, -15, -21, -27, -23, -36, -39, -26, -49, -30, -30, -32, -30, -30, -30, -30, -29, -25, -26, -26, -12, -22, -14, -14, -21, -25, -18, -22, -22, -23, -22, -22, -26, -26, -18, -25, -27, -41, -30, -30, -28, -30, -26, -8, -24, -21, -22, -12, -6, -3, -7, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 };
+	while (enc < 50 || yaw <= 175)
+	{
 		unsigned long timer = millis();
 		Vector norm = mpu.readNormalizeGyro();
 		yaw = yaw + norm.ZAxis * timeStep;
-		servo(-10 + enc * (-3));
-		Serial.println(enc);
-
-		if (enc > 16) {
-			step = 2;
-			enc = 0;
-			servo(-30);
-		}
-		else go(motor, 50);
+		servo(servos[enc] * 1.119);
+		go(motor, 50);
+		Serial.println(yaw);
 		// Wait to full timeStep period 
 		delay((timeStep * 1000) - (millis() - timer));
+
 	}
+	enc = 0;
+	yaw = 0;
+	//int step = 1;
+	//enc = 0;
+	//while (step == 1) {
+	//	digitalWrite(RED, 1);
+	//	unsigned long timer = millis();
+	//	Vector norm = mpu.readNormalizeGyro();
+	//	yaw = yaw + norm.ZAxis * timeStep;
+	//	servo(-10 + enc * (-3));
+	//	Serial.println(enc);
 
-	while (step == 2) {
-		digitalWrite(YELLOW, 1);
-		unsigned long timer = millis();
-		Vector norm = mpu.readNormalizeGyro();
-		yaw = yaw + norm.ZAxis * timeStep;
-		Serial.println(enc);
+	//	if (enc > 22) {
+	//		step = 2;
+	//		enc = 0;
+	//		servo(-30);
+	//	}
+	//	else go(motor, 50);
+	//	// Wait to full timeStep period 
+	//	delay((timeStep * 1000) - (millis() - timer));
+	//}
 
-		if (enc > 24) {
-			step = 3;
-			enc = -17;
-		}
-		else go(motor, 50);
-		// Wait to full timeStep period 
-		delay((timeStep * 1000) - (millis() - timer));
-	}
+	//while (step == 2) {
+	//	digitalWrite(YELLOW, 1);
+	//	unsigned long timer = millis();
+	//	Vector norm = mpu.readNormalizeGyro();
+	//	yaw = yaw + norm.ZAxis * timeStep;
+	//	Serial.println(enc);
 
-	while (step == 3) {
-		digitalWrite(GREEN, 1);
-		unsigned long timer = millis();
-		Vector norm = mpu.readNormalizeGyro();
-		yaw = yaw + norm.ZAxis * timeStep;
-		servo(enc * (2.6));
-		Serial.println(enc);
+	//	if (enc > 24) {
+	//		step = 3;
+	//		enc = -17;
+	//	}
+	//	else go(motor, 50);
+	//	// Wait to full timeStep period 
+	//	delay((timeStep * 1000) - (millis() - timer));
+	//}
 
-		if (enc > 0 || yaw >= 180) {
-			step = 4;
-			enc = 0;
-			yaw = 0;
-		}
-		else go(motor, 50);
-		// Wait to full timeStep period 
-		delay((timeStep * 1000) - (millis() - timer));
-	}
+	//while (step == 3) {
+	//	digitalWrite(GREEN, 1);
+	//	unsigned long timer = millis();
+	//	Vector norm = mpu.readNormalizeGyro();
+	//	yaw = yaw + norm.ZAxis * timeStep;
+	//	servo(enc * (2.6));
+	//	Serial.println(enc);
+
+	//	if (enc > 0 || yaw >= 180) {
+	//		step = 4;
+	//		enc = 0;
+	//		yaw = 0;
+	//	}
+	//	else go(motor, 50);
+	//	// Wait to full timeStep period 
+	//	delay((timeStep * 1000) - (millis() - timer));
+	//}
 }
 
 void setup() {
@@ -175,7 +208,7 @@ void loop() {
 		Vector norm = mpu.readNormalizeGyro();
 		yaw = yaw + norm.ZAxis * timeStep;
 		servo(yaw * 3);
-		if (enc > 45) {
+		if (enc > 39) {
 			step = 2;
 			enc = 0;
 		}
@@ -197,7 +230,7 @@ void loop() {
 		servo(yaw * 3);
 		Serial.println(enc);
 
-		if (enc > 27) {
+		if (enc > 17) {
 			step = 4;
 		}
 		else go(motor, 50);
@@ -217,7 +250,7 @@ void loop() {
 		servo(yaw * 3);
 		Serial.println(enc);
 
-		if (enc > 28) {
+		if (enc > 27) {
 			step = 6;
 		}
 		else go(motor, 50);
@@ -238,7 +271,7 @@ void loop() {
 		servo(yaw * 3);
 		Serial.println(enc);
 
-		if (enc > 18) {
+		if (enc > 17) {
 			step = 8;
 		}
 		else go(motor, 50);
@@ -258,7 +291,7 @@ void loop() {
 		servo(yaw * 3);
 		Serial.println(enc);
 
-		if (enc > 19) {
+		if (enc > 25) {
 			step = 10;
 			go(motor, -255);
 			delay(200);

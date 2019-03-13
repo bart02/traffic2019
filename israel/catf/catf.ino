@@ -55,7 +55,7 @@ void povorot(bool minus = 1) {
 		servo(enc * (2.6));
 		Serial.println(enc);
 
-		if (enc > 0 || yaw >= 90) {
+		if (enc > 0 || yaw >= 87) {
 			step = 3;
 			enc = 0;
 			yaw = 0;
@@ -170,12 +170,18 @@ void loop() {
 	//delay(70);
 	//go(motor, 0);
 	//while (true);
+	go(motor, 60);
+	servo(0);
+	while (true)
+	{
+
+	}
 	while (step == 1) {
 		unsigned long timer = millis();
 		Vector norm = mpu.readNormalizeGyro();
 		yaw = yaw + norm.ZAxis * timeStep;
 		servo(yaw);
-		if (enc > 37) {
+		if (enc > 41) {
 			step = 2;
 			enc = 0;
 		}
@@ -197,7 +203,7 @@ void loop() {
 		servo(yaw);
 		Serial.println(enc);
 
-		if (enc > 14) {
+		if (enc > 16) {
 			step = 4;
 		}
 		else go(motor, 50);
@@ -217,7 +223,7 @@ void loop() {
 		servo(yaw);
 		Serial.println(enc);
 
-		if (enc > 20) {
+		if (enc > 22) {
 			step = 6;
 		}
 		else go(motor, 50);
@@ -238,7 +244,7 @@ void loop() {
 		servo(yaw);
 		Serial.println(enc);
 
-		if (enc > 20) {
+		if (enc > 18) {
 			step = 8;
 		}
 		else go(motor, 50);
@@ -258,7 +264,7 @@ void loop() {
 		servo(yaw);
 		Serial.println(enc);
 
-		if (enc > 20) {
+		if (enc > 19) {
 			step = 10;
 			go(motor, -255);
 			delay(200);

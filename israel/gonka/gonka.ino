@@ -7,8 +7,12 @@
 Octoliner lineleft(42);
 Octoliner lineright(45);
 
-#define ENCODER_INT 2 // прерывание энкодера
+#define ENCODER_INT 0 // прерывание энкодера
 // текущее значение энкодера в переменной enc
+
+#define RED 40
+#define YELLOW 39
+#define GREEN 38
 
 //            [en, in1, in2]
 int motor[3] = { 3, 24, 25 };
@@ -20,7 +24,7 @@ void setup() {
 	myservo.attach(14);
 	Serial1.begin(115200);
 	Serial.begin(9600);
-	//waitGreen();
+	
 	enc = -5;
 
 
@@ -38,13 +42,63 @@ void setup() {
 	lineright.setSensitivity(220);
 	// выставляем яркость свечения ИК-светодиодов в диапазоне от 0 до 255
 	lineright.setBrightness(255);
+	pinMode(RED, OUTPUT);
+	pinMode(YELLOW, OUTPUT);
+	pinMode(GREEN, OUTPUT);
+	waitGreen();
 }
 
 void loop() {
-	byte speed = 90;
-	float kp = 9; //40
+	byte speed = 120;
+	float kp = 3; //40
 	float ki = 0; //40
-	float kd = 41; //80
+	float kd = 10; //80
+
+	if (enc > 15) {
+		speed = 90;
+		digitalWrite(RED, 1);
+	}
+	if (enc > 30) {
+		kp = 8;
+		kd = 30;
+		digitalWrite(YELLOW, 1);
+	}
+	if (enc > 65) {
+		speed = 120;
+		kp = 3;
+		kd = 10;
+	}
+	if (enc > 75) {
+		speed = 80;
+	}
+	if (enc > 80) {
+		kp = 10;
+		kd = 50;
+	}
+	if (enc > 110) {
+		speed = 120;
+		kp = 3;
+		kd = 10;
+	}
+	if (enc > 130) {
+		speed = 90;
+	}
+	if (enc > 135) {
+		kp = 8;
+		kd = 30;
+	}
+	if (enc > 195) {
+		speed = 120;
+		kp = 3;
+		kd = 10;
+	}
+	if (enc > 200) {
+		speed = 90;
+	}
+	if (enc > 205) {
+		kp = 8;
+		kd = 30;
+	}
 
 	//Serial.println(enc);
 
@@ -55,6 +109,6 @@ void loop() {
 	
 	float pd = PID(err, kp, ki, kd);
 	servo(pd);
-	Serial.println(pd);
+	Serial.println(enc);
 	delay(5);
 }

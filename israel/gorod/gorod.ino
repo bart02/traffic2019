@@ -16,6 +16,7 @@ SharpIR sharp(A6, 1080);
 
 #define PLEFT 52
 #define PRIGHT 53
+#define STOPSIG 51
 
 #define RED 40
 #define YELLOW 39
@@ -29,7 +30,7 @@ int irtek = -1;
 bool ultraon = 0;
 bool svetofor = 1;
 unsigned long mil = 0;
-unsigned long vrem = 1500;
+unsigned long vrem = 5000;
 bool stopped = 0;
 
 byte blink = 0; //1red 2 y 3g
@@ -68,6 +69,7 @@ void setup() {
 	pinMode(RED, OUTPUT);
 	pinMode(YELLOW, OUTPUT);
 	pinMode(GREEN, OUTPUT);
+	pinMode(STOPSIG, OUTPUT);
 	//waitGreen();
 
 }
@@ -80,46 +82,52 @@ void loop() {
 	if (ir == 5) {
 		int dist = sharp.distance();
 		Serial.println(dist);
-		if (dist < 30 && polin) {
+		if (dist < 50 && polin) {
+			digitalWrite(STOPSIG, 1);
 			polin = 0;
 			servo(0); 
 			go(motor, -255);
-			delay(30);
+			delay(200);
 			go(motor, 0);
 			delay(1000);
 		}
 		if ((dist >= 60) && !polin) {
 			ultraon = 0;
 			polin = 1;
+			digitalWrite(STOPSIG, 0);
 		}
 	}
 	if (ir != -1 && ir != 2 && ir != 3 && ir != 5 && ir < 7 && svetofor && polin) {
 		//speed = SPEEDTEK - 20;
 		if (lineright.analogRead(0) > 300 && lineright.analogRead(1) > 300 && lineright.analogRead(2) > 300 && lineright.analogRead(3) > 300 && lineright.analogRead(4) > 300 && lineright.analogRead(5) > 300) {
 			if (ir == 6) {
+				digitalWrite(STOPSIG, 1);
 				mil = millis();
 				polin = 0;
 				servo(0);
 				go(motor, -255);
-				delay(80);
+				delay(200);
 				go(motor, 0);
 				delay(5000);
+				digitalWrite(STOPSIG, 0);
 				go(motor, 60);
 				delay(500);
 				polin = 1;
 			}
 			else {
+				digitalWrite(STOPSIG, 1);
 				mil = millis();
 				polin = 0;
 				servo(0);
 				go(motor, -255);
-				delay(70);
+				delay(200);
 				go(motor, 0);
 				delay(500);
 			}
 		}
 	}
 	if (ir != -1 && ir == 2 && !polin) {
+		digitalWrite(STOPSIG, 0);
 		servo(0);
 		speed = SPEEDTEK;
 		//go(motor, speed);
@@ -136,7 +144,10 @@ void loop() {
 	if (millis() - mil > vrem && !svetofor) {
 		speed = SPEEDTEK;
 		svetofor = 1;
-		blink = 0;
+	}
+
+	if (millis() - mil > vrem) {
+		if (blink == PLEFT || blink == PRIGHT) blink = 0;
 		digitalWrite(PLEFT, 0);
 		digitalWrite(PRIGHT, 0);
 	}
@@ -149,7 +160,7 @@ void loop() {
 
 	if (millis() - irdamil > 200) {
 		if (ir > -1 && ir < 7) {
-			Serial.println(ir);
+			Serial.println(blink);
 			if (ir == 0) {
 				digitalWrite(RED, 1);
 				digitalWrite(YELLOW, 0);
@@ -196,7 +207,7 @@ void loop() {
 			timerirdamil = millis();
 		}
 		else {
-			if (millis() - timerirdamil > 500) {
+			if (millis() - timerirdamil > 1000) {
 				digitalWrite(RED, 0);
 				digitalWrite(YELLOW, 0);
 				digitalWrite(GREEN, 0);
@@ -210,7 +221,7 @@ void loop() {
 			blink = PLEFT;
 			polin = 0;
 			servo(0);
-			delay(1000);
+			delay(500);
 			polin = 1;
 			//speed = SPEEDTEK;
 		} else {
@@ -218,7 +229,7 @@ void loop() {
 			blink = PRIGHT;
 			polin = 0;
 			go(motor, SPEEDTEK - 20);
-			servo(45);
+			servo(50);
 			delay(700);
 			speed = SPEEDTEK;
 			go(motor, speed);
@@ -236,14 +247,16 @@ void loop() {
 	//	digitalWrite(40, 0);
 	//}
 	if (polin) {
-		float kp = 7; //40
-		float ki = 0.2; //40
-		float kd = 30; //80
+		float kp = 15; //40
+		float ki = 0; //40
+		float kd = 60; //80
 		
-		Serial.println(count);
+		//Serial.println(count);
+		//printSensors(d);
 		float err = senOut(d, w);
 		float pd = PID(err, kp, ki, kd);
 		servo(pd);
 		go(motor, speed);
+		delay(5);
 	}
 }

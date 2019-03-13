@@ -24,7 +24,7 @@ void setup() {
 	myservo.attach(14);
 	Serial1.begin(115200);
 	Serial.begin(9600);
-	
+
 	enc = -5;
 
 
@@ -45,7 +45,7 @@ void setup() {
 	pinMode(RED, OUTPUT);
 	pinMode(YELLOW, OUTPUT);
 	pinMode(GREEN, OUTPUT);
-	//waitGreen();
+	waitGreen();
 }
 
 void loop() {
@@ -53,7 +53,6 @@ void loop() {
 	float kp = 3; //40
 	float ki = 0; //40
 	float kd = 10; //80
-	int dell = 7; //80
 
 	if (enc > 15) {
 		speed = 110;
@@ -66,23 +65,20 @@ void loop() {
 		digitalWrite(YELLOW, 1);
 	}
 	if (enc > 65) {
-		speed = 90;
+		speed = 120;
 		kp = 3;
-		ki = 0;
 		kd = 10;
 	}
 	if (enc > 75) {
 		speed = 80;
 	}
 	if (enc > 80) {
-		dell = 5;
 		kp = 10;
 		kd = 50;
 	}
 	if (enc > 110) {
 		speed = 120;
 		kp = 3;
-		ki = 0;
 		kd = 10;
 	}
 	if (enc > 130) {
@@ -111,9 +107,9 @@ void loop() {
 	int d[16] = { lineleft.analogRead(7), lineleft.analogRead(6), lineleft.analogRead(5), lineleft.analogRead(4), lineleft.analogRead(3), lineleft.analogRead(2), lineleft.analogRead(1), lineleft.analogRead(0), lineright.analogRead(7), lineright.analogRead(6), lineright.analogRead(5), lineright.analogRead(4), lineright.analogRead(3), lineright.analogRead(2), lineright.analogRead(1), lineright.analogRead(0) };
 	//printSensors(d);
 	float err = senOut(d, w);
-	
+
 	float pd = PID(err, kp, ki, kd);
 	servo(pd);
 	Serial.println(enc);
-	delay(dell);
+	delay(5);
 }

@@ -50,10 +50,10 @@ void setup() {
 }
 
 void loop() {
-	byte speed = 90;
-	float kp = 7; //40
-	float ki = 0.5; //40
-	float kd = 40; //80
+	byte speed = 120;
+	float kp = 6.5; //40
+	float ki = 0.2; //40
+	float kd = 13; //80
 
 	//Serial.println(enc);
 

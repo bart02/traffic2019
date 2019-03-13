@@ -62,7 +62,7 @@ float PD(float in, float kp, float kd) {
 float PID(float in, float kp, float ki, float kd) {
 	float out = 0;
 	sum += in;
-	sum = constrain(sum * ki, -200, 200);
+	sum = constrain(sum, -100, 100);
 	if (useold) out = in * kp + (in - oldin) * kd + sum * ki;
 	else out = in * kp;
 	useold = 1;

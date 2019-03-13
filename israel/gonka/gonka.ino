@@ -45,7 +45,7 @@ void setup() {
 	pinMode(RED, OUTPUT);
 	pinMode(YELLOW, OUTPUT);
 	pinMode(GREEN, OUTPUT);
-	waitGreen();
+	//waitGreen();
 }
 
 void loop() {
@@ -53,31 +53,36 @@ void loop() {
 	float kp = 3; //40
 	float ki = 0; //40
 	float kd = 10; //80
+	int dell = 7; //80
 
 	if (enc > 15) {
-		speed = 90;
+		speed = 110;
 		digitalWrite(RED, 1);
 	}
 	if (enc > 30) {
-		kp = 8;
-		kd = 30;
+		kp = 4;
+		kd = 80;
+		ki = 0.25;
 		digitalWrite(YELLOW, 1);
 	}
 	if (enc > 65) {
-		speed = 120;
+		speed = 90;
 		kp = 3;
+		ki = 0;
 		kd = 10;
 	}
 	if (enc > 75) {
 		speed = 80;
 	}
 	if (enc > 80) {
+		dell = 5;
 		kp = 10;
 		kd = 50;
 	}
 	if (enc > 110) {
 		speed = 120;
 		kp = 3;
+		ki = 0;
 		kd = 10;
 	}
 	if (enc > 130) {
@@ -110,5 +115,5 @@ void loop() {
 	float pd = PID(err, kp, ki, kd);
 	servo(pd);
 	Serial.println(enc);
-	delay(5);
+	delay(dell);
 }

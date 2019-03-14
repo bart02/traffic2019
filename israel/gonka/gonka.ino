@@ -45,7 +45,7 @@ void setup() {
 	pinMode(RED, OUTPUT);
 	pinMode(YELLOW, OUTPUT);
 	pinMode(GREEN, OUTPUT);
-	//waitGreen();
+	waitGreen();
 }
 
 void loop() {

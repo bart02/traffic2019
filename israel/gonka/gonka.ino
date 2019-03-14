@@ -45,7 +45,7 @@ void setup() {
 	pinMode(RED, OUTPUT);
 	pinMode(YELLOW, OUTPUT);
 	pinMode(GREEN, OUTPUT);
-	waitGreen();
+	//waitGreen();
 }
 
 void loop() {
@@ -55,7 +55,7 @@ void loop() {
 	float kd = 10; //80
 
 	if (enc > 15) {
-		speed = 110;
+		speed = 90;
 		digitalWrite(RED, 1);
 	}
 	if (enc > 30) {

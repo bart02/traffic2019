@@ -12,7 +12,7 @@ SharpIR sharp(A6, 1080);
 
 #define ENCODER_INT 2 // прерывание энкодера
 // текущее значение энкодера в переменной enc
-#define SPEEDTEK 70
+#define SPEEDTEK 65
 
 #define PLEFT 52
 #define PRIGHT 53
@@ -30,7 +30,7 @@ int irtek = -1;
 bool ultraon = 0;
 bool svetofor = 1;
 unsigned long mil = 0;
-unsigned long vrem = 5000;
+unsigned long vrem = 3000;
 bool stopped = 0;
 
 byte blink = 0; //1red 2 y 3g
@@ -70,7 +70,7 @@ void setup() {
 	pinMode(YELLOW, OUTPUT);
 	pinMode(GREEN, OUTPUT);
 	pinMode(STOPSIG, OUTPUT);
-	//waitGreen();
+	waitGreen();
 
 }
 
@@ -102,7 +102,6 @@ void loop() {
 		if (lineright.analogRead(0) > 300 && lineright.analogRead(1) > 300 && lineright.analogRead(2) > 300 && lineright.analogRead(3) > 300 && lineright.analogRead(4) > 300 && lineright.analogRead(5) > 300) {
 			if (ir == 6) {
 				digitalWrite(STOPSIG, 1);
-				mil = millis();
 				polin = 0;
 				servo(0);
 				go(motor, -255);
@@ -113,16 +112,19 @@ void loop() {
 				go(motor, 60);
 				delay(500);
 				polin = 1;
+				mil = millis();
+				svetofor = 0;
 			}
 			else {
 				digitalWrite(STOPSIG, 1);
-				mil = millis();
 				polin = 0;
 				servo(0);
 				go(motor, -255);
 				delay(200);
 				go(motor, 0);
 				delay(500);
+				mil = millis();
+				svetofor = 0;
 			}
 		}
 	}
@@ -247,9 +249,9 @@ void loop() {
 	//	digitalWrite(40, 0);
 	//}
 	if (polin) {
-		float kp = 15; //40
-		float ki = 0; //40
-		float kd = 60; //80
+		float kp = 14; //40
+		float ki = 0.09; //40
+		float kd = 50; //80
 		
 		//Serial.println(count);
 		//printSensors(d);

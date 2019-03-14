@@ -10,9 +10,11 @@ Octoliner lineleft(42);
 Octoliner lineright(45);
 SharpIR sharp(A6, 1080);
 
+
+#define SPEEDYY 60
 #define ENCODER_INT 2 // прерывание энкодера
 // текущее значение энкодера в переменной enc
-#define SPEEDTEK 65
+int SPEEDTEK = SPEEDYY - 20;
 
 #define PLEFT 52
 #define PRIGHT 53
@@ -43,6 +45,8 @@ unsigned long timerirdamil = 0;
 int count = 1;
 
 int speed = SPEEDTEK;
+bool wasstopu = 0;
+bool infra = 1;
 
 void setup() {
 	attachInterrupt(ENCODER_INT, encoder, RISING);
@@ -71,7 +75,6 @@ void setup() {
 	pinMode(GREEN, OUTPUT);
 	pinMode(STOPSIG, OUTPUT);
 	waitGreen();
-
 }
 
 void loop() {
@@ -79,24 +82,32 @@ void loop() {
 	float kd = 100; //80
 	int ir = IRread();
 	int d[16] = { lineleft.analogRead(7), lineleft.analogRead(6), lineleft.analogRead(5), lineleft.analogRead(4), lineleft.analogRead(3), lineleft.analogRead(2), lineleft.analogRead(1), lineleft.analogRead(0), lineright.analogRead(7), lineright.analogRead(6), lineright.analogRead(5), lineright.analogRead(4), lineright.analogRead(3), lineright.analogRead(2), lineright.analogRead(1), lineright.analogRead(0) };
-	if (ir == 5) {
+	//if (ir == 5) { 
+	if (infra) {
 		int dist = sharp.distance();
 		Serial.println(dist);
-		if (dist < 50 && polin) {
+		if (dist < 30 && polin) {
+			SPEEDTEK = SPEEDYY;
+			speed = SPEEDTEK;
+			wasstopu = 1;
 			digitalWrite(STOPSIG, 1);
 			polin = 0;
-			servo(0); 
+			servo(0);
 			go(motor, -255);
 			delay(200);
 			go(motor, 0);
 			delay(1000);
 		}
-		if ((dist >= 60) && !polin) {
+		if ((dist >= 60) && !polin && wasstopu) {
+			wasstopu = 0;
 			ultraon = 0;
 			polin = 1;
 			digitalWrite(STOPSIG, 0);
+			SPEEDTEK = SPEEDYY;
 		}
+		//}
 	}
+
 	if (ir != -1 && ir != 2 && ir != 3 && ir != 5 && ir < 7 && svetofor && polin) {
 		//speed = SPEEDTEK - 20;
 		if (lineright.analogRead(0) > 300 && lineright.analogRead(1) > 300 && lineright.analogRead(2) > 300 && lineright.analogRead(3) > 300 && lineright.analogRead(4) > 300 && lineright.analogRead(5) > 300) {
@@ -137,7 +148,7 @@ void loop() {
 		polin = 1;
 	}
 	if ((ir == 2 || ir == 3) && polin) {
-		if (lineright.analogRead(0) > 300 && lineright.analogRead(1) > 300 && lineright.analogRead(2) > 300 && lineright.analogRead(3) > 300 && lineright.analogRead(4) > 300 && lineright.analogRead(5) > 300) {
+		if ( (lineright.analogRead(0) > 300 && lineright.analogRead(1) > 300 && lineright.analogRead(2) > 300 && lineright.analogRead(3) > 300 && lineright.analogRead(4) > 300 && lineright.analogRead(5) > 300)  ) {
 			speed = SPEEDTEK + 5;
 			svetofor = 0;
 			mil = millis();
@@ -152,6 +163,7 @@ void loop() {
 		if (blink == PLEFT || blink == PRIGHT) blink = 0;
 		digitalWrite(PLEFT, 0);
 		digitalWrite(PRIGHT, 0);
+		infra = 1;
 	}
 
 	if (blink && millis() - blinkmil > 500) {
@@ -218,6 +230,7 @@ void loop() {
 	}
 
 	if (ir == 7 && senSum(d) > 6500 && senSum(d) < 8000 && millis() - mil > 500) {
+		infra = 0;
 		if (count % 2 == 0) {
 			digitalWrite(PLEFT, 1);
 			blink = PLEFT;
@@ -231,8 +244,8 @@ void loop() {
 			blink = PRIGHT;
 			polin = 0;
 			go(motor, SPEEDTEK - 20);
-			servo(50);
-			delay(700);
+			servo(70);
+			delay(800);
 			speed = SPEEDTEK;
 			go(motor, speed);
 			polin = 1;

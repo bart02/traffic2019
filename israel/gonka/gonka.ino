@@ -45,7 +45,7 @@ void setup() {
 	pinMode(RED, OUTPUT);
 	pinMode(YELLOW, OUTPUT);
 	pinMode(GREEN, OUTPUT);
-	waitGreen();
+	//waitGreen();
 }
 
 void loop() {
@@ -93,11 +93,16 @@ void loop() {
 		kd = 10;
 	}
 	if (enc > 200) {
-		speed = 90;
+		speed = 80;
 	}
 	if (enc > 205) {
 		kp = 8;
-		kd = 30;
+		kd = 50;
+	}
+	if (enc > 245) {
+		speed = 120;
+		kp = 3;
+		kd = 10;
 	}
 
 	//Serial.println(enc);
